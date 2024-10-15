@@ -72,6 +72,10 @@ class BlogPost(db.Model, SerializerMixin):
     # mapping a post to comments
     comments = db.relationship('Comment', back_populates='post', cascade='all, delete-orphan')
 
+    #Association proxy to get categories of a post
+    category_names = association_proxy('categories', 'name',
+                                       creator=lambda category_obj: Category(name=category_obj))
+
     def __repr__(self):
         return f'<BlogPost {self.title}, {self.content}>'
     
@@ -80,7 +84,7 @@ class Comment(db.Model, SerializerMixin):
 
     serialize_only = ('id', 'content', 'created_at', 'post.title', 'author.username')
     serialize_rules = ()
-    
+
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
