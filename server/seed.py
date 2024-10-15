@@ -36,7 +36,8 @@ if __name__ == '__main__':
         for _ in range (10):
             user = User(
                 username=fake.user_name(),
-                email=fake.email()
+                email=fake.email(),
+                password=fake.password()
             )
             users.append(user)
         db.session.add_all(users)
@@ -50,9 +51,14 @@ if __name__ == '__main__':
                 title=fake.sentence(nb_words=6),
                 content=fake.text(max_nb_chars=200),
                 user_id=rc(users).id,
-                category_id=rc(categories).id
-
-            )
+                )
+            
+            categories_to_assign= set()
+            while len(categories_to_assign) < randint(1, 5):
+                category = rc(categories)
+               # if category not in categories_to_assign:
+                categories_to_assign.add(category)
+            
             posts.append(post)
         db.session.add_all(posts)
         db.session.commit()
@@ -62,7 +68,8 @@ if __name__ == '__main__':
         for _ in range(50):
             comment = Comment(
                 content=fake.sentence(nb_words=10),
-                post_id=rc(posts).id
+                post_id=rc(posts).id,
+                user_id=rc(users).id
             )
             comments.append(comment)
         db.session.add_all(comments)
