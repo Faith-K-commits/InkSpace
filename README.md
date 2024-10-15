@@ -1,6 +1,36 @@
 
 # Phase 4 Full-Stack Application Project Template
 
+## Relationships and Models
+![Alt text](images/relationship.png "Relationship diagram")
+
+# Models
+Our database consists of four main models :
+
+1.User 
+2.Category 
+3.BlogPost
+4.Comment
+
+There is also an association tables (post_catgory) to handle the many-to-many relationship between BlogPosts and Categories
+
+# Model Relationships
+User 
+i. A user can have multiple posts (one-to-many).
+ii. A user can write many Comments(one-to-many)
+
+Category
+i. A category can have multiple blog posts (many-to-many)
+
+BlogPost
+i. A blog post is associated with one user (many-to-one).
+ii. A blog post can have multiple categories (many-to-many).
+iii. A blog post can have multiple comments (one-to-many).
+
+Comment
+i. A comment is associated with one user (many-to-one).
+ii. A comment is associated with one blog post (many-to-one).
+
 ## Learning Goals
 
 - Discuss the basic directory structure of a full-stack Flask/React application.
