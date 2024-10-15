@@ -15,8 +15,11 @@ post_category = db.Table(
         'categories.id'), primary_key=True)
 )
 
-class User(db.Model):
+class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
+
+    serialize_only = ('id', 'username', 'email')
+    serialize_rules = ('-password',)
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -32,8 +35,11 @@ class User(db.Model):
     def __repr__(self):
         return f' <User {self.username}, {self.email}>'
     
-class Category(db.Model):
+class Category(db.Model, SerializerMixin):
     __tablename__ = 'categories'
+    
+    serialize_only = ('id', 'name', 'posts.title', 'posts.content')
+    serialize_rules = ()
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
@@ -44,8 +50,11 @@ class Category(db.Model):
     def __repr__(self):
         return f'<Category {self.name}>'
     
-class BlogPost(db.Model):
+class BlogPost(db.Model, SerializerMixin):
     __tablename__ = 'blog_posts'
+    
+    serialize_only = ('id', 'title', 'content', 'created_at', 'categories.name', 'author.username')
+    serialize_rules = ()
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -66,8 +75,12 @@ class BlogPost(db.Model):
     def __repr__(self):
         return f'<BlogPost {self.title}, {self.content}>'
     
-class Comment(db.Model):
+class Comment(db.Model, SerializerMixin):
     __tablename__ = 'comments'
+
+    serialize_only = ('id', 'content', 'created_at', 'post.title', 'author.username')
+    serialize_rules = ()
+    
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
