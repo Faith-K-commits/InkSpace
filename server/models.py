@@ -55,7 +55,7 @@ class BlogPost(db.Model):
     
     #Relationships
     #mapping a post to categories
-    categories = db.relationhip('Category', secondary=post_category, back_populates='posts')
+    categories = db.relationship('Category', secondary=post_category, back_populates='posts')
     
     #mapping a post to an author
     author = db.relationship('User', back_populates='posts') 
@@ -69,7 +69,7 @@ class BlogPost(db.Model):
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.Tetx, nullable=False)
+    content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
