@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Switch, Route } from "react-router-dom";
+import React from "react";
+import { Outlet } from "react-router-dom";
 
 function App() {
-  return <h1>Project Client</h1>;
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Outlet />
+    </div>
+  );
 }
 
 export default App;
