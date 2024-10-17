@@ -1,8 +1,10 @@
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm import validates
+from sqlalchemy.ext.hybrid import hybrid_property 
 
 from datetime import datetime
-from config import db, metadata
+from config import db, metadata, bcrypt
 
 # Models go here!
 #Association Table for Many to many Relationship between BlogPost and Category
@@ -24,7 +26,28 @@ class User(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(128), nullable=False)
+    _password_hash = db.Column(db.String)
+
+    @hybrid_property
+    def password_hash(self):
+        raise AttributeError('Password hashes may not be viewed.')
+    
+    @password_hash.setter
+    def password_hash(self, password):
+        password_hash = bcrypt.generate_password_hash(
+            password.encode('utf-8'))
+        self._password_hash = password_hash.decode('utf-8')
+
+    def authenticate(self, password):
+        return bcrypt.check_password_hash(
+            self._password_hash, password.encode('utf-8')
+        )
+    
+    @validates('username')
+    def validate_username(self, key, username):
+        if not username:
+            raise ValueError("Username must be present")
+        return username
 
     #Relationship mapping user to posts
     posts = db.relationship('BlogPost', back_populates='author', cascade='all, delete-orphan')
@@ -54,7 +77,7 @@ class BlogPost(db.Model, SerializerMixin):
     __tablename__ = 'blog_posts'
     
     serialize_only = ('id', 'title', 'content', 'created_at', 'categories.name', 'author.username')
-    serialize_rules = ()
+    serialize_rules = ("-categories.posts","-comments.post", "-auther.posts" ,)
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
