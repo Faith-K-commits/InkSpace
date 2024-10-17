@@ -21,7 +21,7 @@ def seed_data():
             user = User(
                 username=fake.user_name(),
                 email=fake.email(),
-                password='password123'  # You can add password hashing here if needed
+                _password_hash='password123'  # You can add password hashing here if needed
             )
             users.append(user)
             db.session.add(user)

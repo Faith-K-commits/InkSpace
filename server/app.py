@@ -1,166 +1,218 @@
-from flask import Flask, request, jsonify, session
-from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt
-from flask_marshmallow import Marshmallow
-from flask_cors import CORS
-from flask_restful import Api, Resource
-from flask_restful import reqparse
+#!/usr/bin/env python3
 
-# Initialize app and extensions
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'yoursecretkey'  # Replace with a strong secret key for sessions
-CORS(app)
-db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
-ma = Marshmallow(app)
-api = Api(app)
+# Standard library imports
+from datetime import datetime
 
-# Models
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(128), nullable=False)
+# Remote library imports
+from flask import request, session, jsonify, abort
+from flask_restful import Resource
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.exc import IntegrityError 
+# Local imports
+from config import app, db, api
+from models import User, BlogPost, Category, Comment
 
-    def __init__(self, email, password):
-        self.email = email
-        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+# Secret key for sessions
+app.config['SECRET_KEY'] = 'your_secret_key'
 
-class BlogPost(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('posts', lazy=True))
-
-# Marshmallow Schemas
-class UserSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = User
-
-class BlogPostSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = BlogPost
-
-user_schema = UserSchema()
-post_schema = BlogPostSchema()
-posts_schema = BlogPostSchema(many=True)
-
-# Request Parsers
-user_parser = reqparse.RequestParser()
-user_parser.add_argument('email', type=str, required=True, help='Email cannot be blank')
-user_parser.add_argument('password', type=str, required=True, help='Password cannot be blank')
-
-post_parser = reqparse.RequestParser()
-post_parser.add_argument('title', type=str, required=True, help='Title cannot be blank')
-post_parser.add_argument('content', type=str, required=True, help='Content cannot be blank')
-
-# Resources
-
+# Login required decorator
+def login_required(f):
+    def wrap(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'message': 'You need to log in first.'}), 401
+        return f(*args, **kwargs)
+    return wrap
+    
 class Register(Resource):
     def post(self):
-        args = user_parser.parse_args()
-        email = args['email']
-        password = args['password']
+        data = request.get_json()
+
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
         
         user = User.query.filter_by(email=email).first()
         if user:
             return {"message": "User already exists"}, 400
         
-        new_user = User(email=email, password=password)
-        db.session.add(new_user)
-        db.session.commit()
+        new_user = User(
+            username=username,
+            email=email,
+            )
+        user.password_hash = password
+
+        try:
+            db.session.add(user)
+            db.session.commit()
+
+            session['user_id'] = user.id
+
+            return new_user.to_dict(), 201
         
-        return user_schema.jsonify(new_user), 201
+        except IntegrityError:
+            return {'error': '422 Unprocessable Entity'}, 422
+        
+
+class CheckSession(Resource):
+    def get(self):
+
+        user_id = session.get('user_id')
+        if user_id:
+            user = User.query.filter(User.id == user_id).first()
+
+            return  user.to_dict(), 200
+        else:
+            return {"error": "Unauthorized"}, 401
+        
 
 class Login(Resource):
     def post(self):
-        args = user_parser.parse_args()
-        email = args['email']
-        password = args['password']
+        data = request.get_json()
+
+        email = data.get('email')
+        password = data.get('password')
         
         user = User.query.filter_by(email=email).first()
-        if not user or not bcrypt.check_password_hash(user.password, password):
-            return {"message": "Invalid email or password"}, 401
-        
-        session['user_id'] = user.id
-        return {"message": "Login successful"}, 200
+        if user:
+            if user.authenticate(password):
 
+                session['user_id'] = user.id
+                return user.to_dict(), 200
+            
+        return {"message": "Invalid email or password"}, 401
+      
+        
 class Logout(Resource):
-    def post(self):
-        session.pop('user_id', None)
-        return {"message": "Logged out successfully"}, 200
+    @login_required
+    def delete(self):
 
-class BlogPostList(Resource):
-    def get(self):
-        posts = BlogPost.query.all()
-        return posts_schema.jsonify(posts), 200
+        session['user_id'] = None
+
+        return {"message": "Logged out successfully"}, 204
+     
+     
+# BlogPost Resource
+class BlogPostResource(Resource):
+    @login_required
+    def get(self, post_id=None):
+        if post_id:
+            post = BlogPost.query.get_or_404(post_id)
+            return jsonify(post.to_dict(only=("id","content")))
+        else:
+            posts = BlogPost.query.all()
+            return jsonify([post.to_dict(only=("id","content")) for post in posts])
+
+    @login_required
+    def post(self):    
+        data = request.get_json()
+        title = data.get('title')
+        content = data.get('content')
+        category_ids = data.get('category_ids')
     
-    def post(self):
-        if 'user_id' not in session:
-            return {"message": "Unauthorized"}, 401
-        
-        args = post_parser.parse_args()
-        title = args['title']
-        content = args['content']
+        if not title or not content:
+            return {'message': 'Missing title or content'}, 400
+
         user_id = session['user_id']
-        
-        new_post = BlogPost(title=title, content=content, user_id=user_id)
-        db.session.add(new_post)
+        user = User.query.get_or_404(user_id)
+
+        post = BlogPost(title=title, content=content, author=user)
+
+        if category_ids:
+            categories = Category.query.filter(Category.id.in_(category_ids)).all()
+            post.categories.extend(categories)
+
+        db.session.add(post)
         db.session.commit()
-        
-        return post_schema.jsonify(new_post), 201
+        return jsonify(post.to_dict()), 201
 
-class BlogPostDetail(Resource):
-    def get(self, id):
-        post = BlogPost.query.get(id)
-        if not post:
-            return {"message": "Post not found"}, 404
-        return post_schema.jsonify(post), 200
-    
-    def put(self, id):
-        if 'user_id' not in session:
-            return {"message": "Unauthorized"}, 401
+    @login_required
+    def put(self, post_id):
+        post = BlogPost.query.get_or_404(post_id)
+        data = request.get_json()
 
-        post = BlogPost.query.get(id)
-        if not post:
-            return {"message": "Post not found"}, 404
+        post.title = data.get('title', post.title)
+        post.content = data.get('content', post.content)
 
-        if post.user_id != session['user_id']:
-            return {"message": "You can only edit your own posts"}, 403
+        if 'category_ids' in data:
+            post.categories = Category.query.filter(Category.id.in_(data['category_ids'])).all()
 
-        args = post_parser.parse_args()
-        post.title = args['title']
-        post.content = args['content']
         db.session.commit()
-
-        return post_schema.jsonify(post), 200
+        return jsonify(post.to_dict())
     
-    def delete(self, id):
-        if 'user_id' not in session:
-            return {"message": "Unauthorized"}, 401
-
-        post = BlogPost.query.get(id)
-        if not post:
-            return {"message": "Post not found"}, 404
-
-        if post.user_id != session['user_id']:
-            return {"message": "You can only delete your own posts"}, 403
-
+    @login_required
+    def delete(self, post_id):
+        post = BlogPost.query.get_or_404(post_id)
         db.session.delete(post)
         db.session.commit()
+        return {'message': 'Blog post deleted'}
 
-        return {"message": "Post deleted"}, 200
 
-# Register API Resources
+# Comment Resource
+class CommentResource(Resource):
+    @login_required
+    def get (self, post_id):
+        if post_id:
+            comments = Comment.query.filter_by(post_id=post_id)
+            return jsonify([comment.to_dict(only=("id","content"))for comment in comments])
+        else:
+            comments = Comment.query.all()
+            return jsonify([comment.to_dict(only=("id","content")) for comment in comments])
+
+    @login_required
+    def post(self, post_id):
+        post = BlogPost.query.get_or_404(post_id)
+        data = request.get_json()
+
+        content = data.get('content')
+        if not content:
+            return {'message': 'Missing content'}, 400
+
+        user_id = session['user_id']
+        user = User.query.get_or_404(user_id)
+
+        comment = Comment(content=content, post=post, author=user)
+        db.session.add(comment)
+        db.session.commit()
+
+        return jsonify(comment.to_dict()), 201
+
+    @login_required
+    def delete(self, comment_id):
+        comment = Comment.query.get_or_404(comment_id)
+        db.session.delete(comment)
+        db.session.commit()
+        return {'message': 'Comment deleted'}
+
+
+# Category Resource
+class CategoryResource(Resource):
+    @login_required
+    def get(self):
+        categories = Category.query.all()
+        return jsonify([category.to_dict() for category in categories])
+    
+    @login_required
+    def post(self):
+        data = request.get_json()
+        name = data.get('name')
+        if not name:
+            return {'message': 'Missing name'}, 400
+
+        category = Category(name=name)
+        db.session.add(category)
+        db.session.commit()
+
+        return jsonify(category.to_dict()), 201
+
+
+# Adding resources to the API
 api.add_resource(Register, '/register')
 api.add_resource(Login, '/login')
 api.add_resource(Logout, '/logout')
-api.add_resource(BlogPostList, '/posts')
-api.add_resource(BlogPostDetail, '/post/<int:id>')
+api.add_resource(BlogPostResource, '/posts', '/posts/<int:post_id>')
+api.add_resource(CommentResource, '/posts/<int:post_id>/comments', '/comments/<int:comment_id>')
+api.add_resource(CategoryResource, '/categories')
 
-# Run the app
+
 if __name__ == '__main__':
-    db.create_all()
-    app.run(debug=True)
+    app.run(port=5555, debug=True)
