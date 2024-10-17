@@ -4,7 +4,7 @@
 from datetime import datetime
 
 # Remote library imports
-from flask import request, session, jsonify, abort
+from flask import make_response, request, session, jsonify, abort
 from flask_restful import Resource
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError 
@@ -19,7 +19,7 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 def login_required(f):
     def wrap(*args, **kwargs):
         if 'user_id' not in session:
-            return jsonify({'message': 'You need to log in first.'}), 401
+            return make_response(jsonify({'message': 'You need to log in first.'}), 401)
         return f(*args, **kwargs)
     return wrap
     
@@ -33,7 +33,7 @@ class Register(Resource):
         
         user = User.query.filter_by(email=email).first()
         if user:
-            return {"message": "User already exists"}, 400
+            return make_response(jsonify({"message": "User already exists"}), 400)
         
         new_user = User(
             username=username,
@@ -50,7 +50,7 @@ class Register(Resource):
             return new_user.to_dict(), 201
         
         except IntegrityError:
-            return {'error': '422 Unprocessable Entity'}, 422
+            return make_response(jsonify({'error': '422 Unprocessable Entity'}), 422)
         
 
 class CheckSession(Resource):
@@ -62,7 +62,7 @@ class CheckSession(Resource):
 
             return  user.to_dict(), 200
         else:
-            return {"error": "Unauthorized"}, 401
+            return  make_response(jsonify({"error": "Unauthorized"}), 401)
         
 
 class Login(Resource):
@@ -79,7 +79,7 @@ class Login(Resource):
                 session['user_id'] = user.id
                 return user.to_dict(), 200
             
-        return {"message": "Invalid email or password"}, 401
+        return make_response(jsonify({"message": "Invalid email or password"}), 401)
       
         
 class Logout(Resource):
@@ -88,7 +88,7 @@ class Logout(Resource):
 
         session['user_id'] = None
 
-        return {"message": "Logged out successfully"}, 204
+        return  make_response(jsonify({"message": "Logged out successfully"}), 204)
      
      
 # BlogPost Resource
@@ -110,7 +110,7 @@ class BlogPostResource(Resource):
         category_ids = data.get('category_ids')
     
         if not title or not content:
-            return {'message': 'Missing title or content'}, 400
+            return  make_response(jsonify({'message': 'Missing title or content'}), 400)
 
         user_id = session['user_id']
         user = User.query.get_or_404(user_id)
@@ -144,7 +144,7 @@ class BlogPostResource(Resource):
         post = BlogPost.query.get_or_404(post_id)
         db.session.delete(post)
         db.session.commit()
-        return {'message': 'Blog post deleted'}
+        return  make_response(jsonify({'message': 'Blog post deleted'}),204)
 
 
 # Comment Resource
@@ -165,7 +165,7 @@ class CommentResource(Resource):
 
         content = data.get('content')
         if not content:
-            return {'message': 'Missing content'}, 400
+            return make_response(jsonify({'message': 'Missing content'}), 400)
 
         user_id = session['user_id']
         user = User.query.get_or_404(user_id)
@@ -181,7 +181,7 @@ class CommentResource(Resource):
         comment = Comment.query.get_or_404(comment_id)
         db.session.delete(comment)
         db.session.commit()
-        return {'message': 'Comment deleted'}
+        return  make_response(jsonify({'message': 'Comment deleted'}),204)
 
 
 # Category Resource
@@ -196,7 +196,7 @@ class CategoryResource(Resource):
         data = request.get_json()
         name = data.get('name')
         if not name:
-            return {'message': 'Missing name'}, 400
+            return  make_response(jsonify({'message': 'Missing name'}), 400)
 
         category = Category(name=name)
         db.session.add(category)
