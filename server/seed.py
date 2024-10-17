@@ -21,7 +21,7 @@ def seed_data():
             user = User(
                 username=fake.user_name(),
                 email=fake.email(),
-                password='password123'  # You can add password hashing here if needed
+                password='password123'  
             )
             users.append(user)
             db.session.add(user)
@@ -46,9 +46,9 @@ def seed_data():
             post = BlogPost(
                 title=fake.sentence(nb_words=6),
                 content=fake.paragraph(nb_sentences=5),
-                author=fake.random_element(users),  # Randomly pick an author from users
+                author=fake.random_element(users),  
                 created_at=datetime.utcnow(),
-                categories=[fake.random_element(categories)]  # Randomly pick a category
+                categories=[fake.random_element(categories)]  
             )
             posts.append(post)
             db.session.add(post)
@@ -60,8 +60,8 @@ def seed_data():
         for _ in range(num_comments):
             comment = Comment(
                 content=fake.sentence(nb_words=10),
-                author=fake.random_element(users),  # Randomly pick an author from users
-                post=fake.random_element(posts),  # Randomly pick a post
+                author=fake.random_element(users),  
+                post=fake.random_element(posts),  
                 created_at=datetime.utcnow()
             )
             db.session.add(comment)
