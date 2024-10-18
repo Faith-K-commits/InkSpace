@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useFormik } from 'formik';
+import { useNavigate } from 'react-router-dom';
 
 const validate = values => {
   const errors = {};
@@ -13,6 +14,9 @@ const validate = values => {
 };
 
 const CreatePost = () => {
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState(['']); // State to manage category inputs
+
   const formik = useFormik({
     initialValues: {
       title: '',
@@ -20,18 +24,44 @@ const CreatePost = () => {
     },
     validate,
     onSubmit: values => {
-      fetch('/api/posts', {
+      // Combine form values with categories
+      const postData = {
+        ...values,
+        categories: categories.filter(category => category !== ''), 
+      };
+      
+      fetch('/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
-      }).then(response => response.json())
-        .then(data => {
-          console.log('Post created:', data);
-        });
+        body: JSON.stringify(postData),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Post created:', data);
+        navigate('/posts')
+      });
     },
   });
+
+  // Handle adding a new category input field
+  const addCategoryField = () => {
+    setCategories([...categories, '']);
+  };
+
+  // Handle changing category input values
+  const handleCategoryChange = (index, value) => {
+    const newCategories = [...categories];
+    newCategories[index] = value;
+    setCategories(newCategories);
+  };
+
+  const handleCancel = () => {
+    formik.resetForm();
+    setCategories(['']);
+    navigate('/posts')
+  };
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
@@ -65,12 +95,43 @@ const CreatePost = () => {
             {formik.errors.content ? <div className="text-red-500 text-sm mt-1">{formik.errors.content}</div> : null}
           </div>
 
-          <button 
-            type="submit" 
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
-          >
-            Submit
-          </button>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium">Categories</label>
+            {categories.map((category, index) => (
+              <div key={index} className="flex items-center mb-2">
+                <input
+                  type="text"
+                  value={category}
+                  onChange={e => handleCategoryChange(index, e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  placeholder="Enter a category"
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addCategoryField}
+              className="text-blue-500 underline hover:text-blue-600"
+            >
+              Add Another Category
+            </button>
+          </div>
+
+          <div className="flex justify-between">
+            <button 
+              type="submit" 
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
+            >
+              Create Post
+            </button>
+            <button 
+              type="button" 
+              onClick={handleCancel} 
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-300"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -11,7 +11,7 @@ const Navbar = () => {
     })
       .then(response => {
         if (response.ok) {
-          navigate('/login');
+          navigate('/');
         }
       })
       .catch(() => {
