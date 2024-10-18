@@ -47,9 +47,10 @@ class Register(Resource):
 
             session['user_id'] = new_user.id
 
-            return new_user.to_dict(), 201
+            return make_response(jsonify({"message": "User created successfully", "token": "your_token_here"}), 201)        
         
         except IntegrityError:
+            db.session.rollback()
             return make_response(jsonify({'error': '422 Unprocessable Entity'}), 422)
         
 

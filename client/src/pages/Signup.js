@@ -9,29 +9,47 @@ const Signup = () => {
 
   const formik = useFormik({
     initialValues: {
-      name: '',
+      username: '',  
       email: '',
       password: '',
     },
     onSubmit: values => {
-      fetch('/api/auth/register', {
+      fetch('/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          username: values.username, 
+          email: values.email,
+          password: values.password,
+        }),
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(data => {
+            setError(data.message || 'Sign-up failed');
+            throw new Error('Sign-up failed');
+          });
+        }
+        return response.json();
+      })
       .then(data => {
+        // Store token in cookies if the response includes it
         if (data.token) {
-          // Store token in cookies
-          Cookies.set('token', data.token, { expires: 7 }); // Expires in 7 days
-          navigate('/');
+          Cookies.set('token', data.token, { expires: 7 }); 
+          navigate('/posts'); 
         } else {
           setError('Sign-up failed');
         }
       })
-      .catch(() => setError('Error signing up'));
+      .catch(error => {
+        if (error.message === 'Sign-up failed') {
+          setError('User already exists');
+        } else {
+          setError('Error signing up');
+        }
+      });
     },
   });
 
@@ -41,13 +59,13 @@ const Signup = () => {
         <h1 className="text-3xl font-semibold mb-6 text-center">Sign Up</h1>
         <form onSubmit={formik.handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium">Name</label>
+            <label htmlFor="username" className="block text-sm font-medium">Username</label>
             <input
-              id="name"
-              name="name"
+              id="username"  
+              name="username" 
               type="text"
               onChange={formik.handleChange}
-              value={formik.values.name}
+              value={formik.values.username} 
               className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
               required
             />
