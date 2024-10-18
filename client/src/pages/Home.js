@@ -6,7 +6,7 @@ const Home = () => {
     const [posts, setPosts] = useState([]);
 
     useEffect(() => {
-        fetch('posts/resource')
+        fetch('/posts')
         .then(res => res.json())
         .then(data => setPosts(data));
     }, [])

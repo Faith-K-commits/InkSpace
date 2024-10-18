@@ -5,8 +5,8 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    fetch('/api/auth/logout', {
-      method: 'POST',
+    fetch('/logout', {
+      method: 'DELETE',
       credentials: 'include',
     })
       .then(response => {

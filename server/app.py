@@ -39,13 +39,13 @@ class Register(Resource):
             username=username,
             email=email,
             )
-        user.password_hash = password
+        new_user.password_hash = password
 
         try:
-            db.session.add(user)
+            db.session.add(new_user)
             db.session.commit()
 
-            session['user_id'] = user.id
+            session['user_id'] = new_user.id
 
             return new_user.to_dict(), 201
         
