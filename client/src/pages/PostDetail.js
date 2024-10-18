@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
 const PostDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
+    const [comments, setComments] = useState([]);
 
     useEffect(() => {
+        // Fetch the post
         fetch(`/posts/${id}`)
             .then(res => {
                 if (!res.ok) {
@@ -14,7 +18,19 @@ const PostDetail = () => {
                 }
                 return res.json();
             })
-            .then(data => setPost(data))
+            .then(data => {
+                setPost(data);
+                return fetch(`/posts/${id}/comments`);
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Failed to fetch comments');
+                }
+                return res.json();
+            })
+            .then(data => {
+                setComments(data)
+            })
             .catch(error => {
                 console.error('Fetch error:', error);
                 setPost(null);
@@ -30,6 +46,7 @@ const PostDetail = () => {
                     if (res.ok) {
                         alert('Post deleted successfully');
                         navigate('/posts');
+                    } else {
                         alert('Failed to delete the post');
                     }
                 })
@@ -40,19 +57,51 @@ const PostDetail = () => {
     };
 
     const handleEdit = () => {
-        navigate(`/posts/edit/${id}`); // Navigate to the edit page
+        navigate(`/posts/edit/${id}`);
     };
 
     const handleNext = () => {
-        navigate(`/posts/${parseInt(id) + 1}`); // Navigate to the next post
+        navigate(`/posts/${parseInt(id) + 1}`);
     };
 
     const handleBack = () => {
         if (parseInt(id) > 1) {
-            navigate(`/posts/${parseInt(id) - 1}`); // Navigate to the previous post
+            navigate(`/posts/${parseInt(id) - 1}`);
         } else {
-            navigate('/posts')
+            navigate('/posts');
         }
+    };
+
+    const initialValues = { content: '' }; 
+
+    const validationSchema = Yup.object({
+        content: Yup.string()
+            .required('Comment is required')
+            .min(1, 'Comment must be at least 1 character long')
+            .max(500, 'Comment cannot exceed 500 characters'),
+    });
+
+    const handleCommentSubmit = (values, { resetForm }) => {
+        fetch(`/posts/${id}/comments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: values.content }),
+        })
+            .then(res => {
+                if (res.ok) {
+                    return res.json(); // Return the new comment data
+                }
+                throw new Error('Failed to add comment');
+            })
+            .then(data => {
+                setComments([...comments, data]); 
+                resetForm(); 
+            })
+            .catch(error => {
+                console.error('Error adding comment:', error);
+            });
     };
 
     if (!post) {
@@ -73,7 +122,7 @@ const PostDetail = () => {
                 <div className='mt-6 text-gray-800'>
                     {post.content}
                 </div>
-                
+
                 {/* Categories Section */}
                 <div className='mt-6'>
                     <h3 className='text-lg font-semibold mb-2'>Categories:</h3>
@@ -99,8 +148,6 @@ const PostDetail = () => {
                         Delete
                     </button>
                 </div>
-
-                {/* Navigation Buttons */}
                 <div className='mt-6 flex justify-between'>
                     <button 
                         onClick={handleBack} 
@@ -112,6 +159,48 @@ const PostDetail = () => {
                         className='bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400'>
                         Next
                     </button>
+                </div>
+
+                {/* Comments Section */}
+                <div className='mt-8'>
+                    <h3 className='text-lg font-semibold mb-2'>Comments:</h3>
+                    {comments.length > 0 ? (
+                        comments.map(comment => (
+                            <div key={comment.id} className='bg-gray-100 p-4 mb-4 rounded-lg'>
+                                <p className='text-gray-800 mb-1'>{comment.content}</p>
+                                <p className='text-sm text-gray-600'>by {comment.author.username} - {formattedDate}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <p className='text-gray-500'>No comments yet.</p>
+                    )}
+
+                    {/* Comment Form using Formik */}
+                    <Formik
+                        initialValues={initialValues}
+                        validationSchema={validationSchema}
+                        onSubmit={handleCommentSubmit}
+                    >
+                        {({ isSubmitting }) => (
+                            <Form className='mt-4'>
+                                <Field 
+                                    as='textarea'
+                                    name='content' 
+                                    placeholder='Add a comment...' 
+                                    rows='3' 
+                                    className='w-full p-2 border border-gray-300 rounded mb-2'
+                                />
+                                <ErrorMessage name='content' component='div' className='text-red-500 text-sm mb-2' />
+                                <button 
+                                    type='submit' 
+                                    disabled={isSubmitting}
+                                    className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'
+                                >
+                                    Comment
+                                </button>
+                            </Form>
+                        )}
+                    </Formik>
                 </div>
             </div>
         </div>

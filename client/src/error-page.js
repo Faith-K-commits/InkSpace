@@ -12,7 +12,7 @@ const ErrorPage = () => {
         {error.statusText || error.message}
       </p>
       <a
-        href="/"
+        href="/posts"
         className="mt-6 bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 transition duration-300"
       >
         Go Back Home

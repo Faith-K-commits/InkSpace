@@ -217,7 +217,7 @@ class CommentResource(Resource):
         db.session.add(comment)
         db.session.commit()
 
-        return jsonify(comment.to_dict()), 201
+        return make_response(jsonify(comment.to_dict()), 201)
 
     @login_required
     def delete(self, comment_id):
