@@ -22,7 +22,7 @@ const Login = () => {
       })
         .then(response => {
           if (response.ok) {
-            navigate('/home');
+            navigate('/posts');
           } else {
             setError('Invalid credentials');
           }

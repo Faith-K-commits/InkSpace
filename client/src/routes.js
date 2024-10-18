@@ -2,6 +2,7 @@ import App from './components/App';
 import LandingPage from './components/LandingPage';
 import ErrorPage from './error-page';
 import CreatePost from './pages/CreatePost';
+import EditPost from './pages/EditPost';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import PostDetail from './pages/PostDetail';
@@ -19,7 +20,7 @@ const routes = [
                 element: <LandingPage/>
             },
             {
-                path: "/home",
+                path: "/posts",
                 element: <Home />
             },
             {
@@ -41,6 +42,10 @@ const routes = [
             {
                 path: "/signup",
                 element: <Signup />
+            },
+            {
+                path: "/posts/edit/:id",
+                element: <EditPost />
             }
         ]
     },
