@@ -4,10 +4,10 @@ import ErrorPage from './error-page';
 import CreatePost from './pages/CreatePost';
 import EditPost from './pages/EditPost';
 import Home from './pages/Home';
-import Login from './pages/Login';
+import Login from './pages/AuthPage';
 import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
-import Signup from './pages/Signup';
+import AuthPage from './pages/AuthPage';
 
 const routes = [
     {
@@ -36,12 +36,8 @@ const routes = [
                 element: <Profile />
             },
             {
-                path: "/login",
-                element: <Login />
-            },
-            {
-                path: "/signup",
-                element: <Signup />
+                path: "/AuthPage",
+                element: <AuthPage />
             },
             {
                 path: "/posts/edit/:id",

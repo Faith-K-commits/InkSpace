@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
+import BackgroundImage from '../images/background.jpg';
 
 const validate = values => {
   const errors = {};
@@ -27,9 +28,9 @@ const CreatePost = () => {
       // Combine form values with categories
       const postData = {
         ...values,
-        categories: categories.filter(category => category !== ''), 
+        categories: categories.filter(category => category !== ''),
       };
-      
+
       fetch('/posts', {
         method: 'POST',
         headers: {
@@ -37,11 +38,11 @@ const CreatePost = () => {
         },
         body: JSON.stringify(postData),
       })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Post created:', data);
-        navigate('/posts')
-      });
+        .then(response => response.json())
+        .then(data => {
+          console.log('Post created:', data);
+          navigate('/posts');
+        });
     },
   });
 
@@ -57,19 +58,31 @@ const CreatePost = () => {
     setCategories(newCategories);
   };
 
+  // Handle removing a category
+  const removeCategoryField = index => {
+    const newCategories = categories.filter((_, i) => i !== index);
+    setCategories(newCategories);
+  };
+
   const handleCancel = () => {
     formik.resetForm();
     setCategories(['']);
-    navigate('/posts')
+    navigate('/posts');
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full">
-        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Create New Post</h1>
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        backgroundImage: `url(${BackgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <div className="bg-gray-900 p-10 max-w-md w-full rounded-lg shadow-lg">
+        <h1 className="text-2xl text-white mb-6 text-center">Create New Post</h1>
         <form onSubmit={formik.handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="title" className="block text-gray-700 font-medium">Title</label>
             <input
               id="title"
               name="title"
@@ -77,22 +90,28 @@ const CreatePost = () => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               value={formik.values.title}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              placeholder="Title"
+              className="w-full p-3 border border-blue-700 bg-transparent text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
             />
-            {formik.errors.title ? <div className="text-red-500 text-sm mt-1">{formik.errors.title}</div> : null}
+            {formik.errors.title && (
+              <div className="text-red-500 text-sm mt-1">{formik.errors.title}</div>
+            )}
           </div>
 
           <div className="mb-4">
-            <label htmlFor="content" className="block text-gray-700 font-medium">Content</label>
             <textarea
               id="content"
               name="content"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               value={formik.values.content}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              placeholder="Content"
+              className="w-full p-3 border border-blue-700 bg-transparent text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
+              rows="4"
             />
-            {formik.errors.content ? <div className="text-red-500 text-sm mt-1">{formik.errors.content}</div> : null}
+            {formik.errors.content && (
+              <div className="text-red-500 text-sm mt-1">{formik.errors.content}</div>
+            )}
           </div>
 
           <div className="mb-4">
@@ -103,9 +122,16 @@ const CreatePost = () => {
                   type="text"
                   value={category}
                   onChange={e => handleCategoryChange(index, e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full p-3 border border-blue-700 bg-transparent text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
                   placeholder="Enter a category"
                 />
+                <button
+                  type="button"
+                  onClick={() => removeCategoryField(index)}
+                  className="text-red-500 ml-2"
+                >
+                  x
+                </button>
               </div>
             ))}
             <button
@@ -113,20 +139,20 @@ const CreatePost = () => {
               onClick={addCategoryField}
               className="text-blue-500 underline hover:text-blue-600"
             >
-              Add Another Category
+              Add Category
             </button>
           </div>
 
           <div className="flex justify-between">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
             >
               Create Post
             </button>
-            <button 
-              type="button" 
-              onClick={handleCancel} 
+            <button
+              type="button"
+              onClick={handleCancel}
               className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-300"
             >
               Cancel
