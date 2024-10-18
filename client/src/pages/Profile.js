@@ -35,8 +35,9 @@ const Profile = () => {
 
   return (
     <div>
+      {/* <Navbar /> */}
+      <div className="container mx-auto p-6 sm:mt-16">
       <Navbar />
-      <div className="container mx-auto p-6 mt-16">
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
         <h2 className="text-2xl font-bold mb-4">Username: {profile.username}</h2>
         <p className="text-gray-700">Email: {profile.email}</p>

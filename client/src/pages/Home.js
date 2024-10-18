@@ -28,10 +28,10 @@ const Home = () => {
     }, []);
 
     return (
-        <div className="bg-gray-50 min-h-screen p-6">
+        <div className="bg-gray-50 min-h-screen p-4 sm:p-6">
             <NavBar />
-            <h1 className="text-4xl font-bold text-center text-gray-800 mb-8 mt-16">All Blog Posts</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6 sm:mb-8 mt-12 sm:mt-16">All Blog Posts</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
                 {posts.map(post => (
                     <PostCard key={post.id} post={post} />
                 ))}

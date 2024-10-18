@@ -64,7 +64,7 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full">
         <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Create New Post</h1>
         <form onSubmit={formik.handleSubmit}>

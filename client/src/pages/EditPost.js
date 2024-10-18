@@ -115,9 +115,9 @@ const EditPost = () => {
                             <p className='text-gray-500 text-xs italic'>Enter categories separated by commas.</p>
                             <ErrorMessage name='categories' component='div' className='text-red-500 text-xs italic' />
                         </div>
-                        <div className='flex justify-between'>
+                        <div className='flex flex-col sm:flex-row justify-between'>
                             <button
-                                className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'
+                                className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-2 sm:mb-0 sm:mr-2'
                                 type='submit'
                                 disabled={isSubmitting}
                             >
@@ -126,7 +126,7 @@ const EditPost = () => {
                             <button
                                 type='button'
                                 onClick={handleCancel}
-                                className='bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600'
+                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-300"  
                             >
                                 Cancel
                             </button>

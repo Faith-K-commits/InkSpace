@@ -14,7 +14,7 @@ const LandingPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
+      <header className="bg-white shadow sticky top-0 z-50">
         <div className="container mx-auto flex justify-between items-center p-4">
           <h1 className="text-2xl font-bold text-blue-600">InkSpace</h1>
           <nav>

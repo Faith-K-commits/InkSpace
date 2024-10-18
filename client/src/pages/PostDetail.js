@@ -136,7 +136,7 @@ const PostDetail = () => {
                 </div>
 
                 {/* Edit and Delete Buttons */}
-                <div className='mt-6 flex space-x-4'>
+                <div className='mt-6 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4'>
                     <button 
                         onClick={handleEdit} 
                         className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'>

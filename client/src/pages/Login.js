@@ -32,12 +32,12 @@ const Login = () => {
   });
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
-        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Login</h1>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-md bg-white shadow-md rounded-lg p-6 sm:p-8 lg:p-10">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-gray-800">Login</h1>
         
         <form onSubmit={formik.handleSubmit}>
-          <div className="mb-4">
+          <div className="mb-3 sm:mb-4">
             <label htmlFor="email" className="block text-gray-700">Email</label>
             <input
               type="email"
@@ -49,7 +49,7 @@ const Login = () => {
             />
           </div>
 
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <label htmlFor="password" className="block text-gray-700">Password</label>
             <input
               type="password"
