@@ -81,8 +81,34 @@ class Login(Resource):
                 return user.to_dict(), 200
             
         return make_response(jsonify({"message": "Invalid email or password"}), 401)
-      
+
+class ProfileResource(Resource):
+    def get(self):
+        user_id = session.get('user_id')
+        if not user_id:
+            return {'error': 'User not logged in'}, 401
         
+        user = User.query.get(user_id)
+        if not user:
+            return {'error': 'User not found'}, 404
+        
+        return make_response(jsonify(user.to_dict()), 200)
+
+class UserPostsResource(Resource):
+    def get(self):
+        user_id = session.get('user_id')
+        if not user_id:
+            return {'error': 'User not logged in'}, 401
+        
+        user = User.query.get(user_id)
+        if not user:
+            return {'error': 'User not found'}, 404
+
+        posts = BlogPost.query.filter_by(user_id=user_id).all()
+        posts_data = [post.to_dict() for post in posts]
+
+        return make_response(jsonify(posts_data, 200 ))
+
 class Logout(Resource):
     @login_required
     def delete(self):
@@ -226,6 +252,8 @@ class CategoryResource(Resource):
 api.add_resource(Register, '/register')
 api.add_resource(Login, '/login')
 api.add_resource(Logout, '/logout')
+api.add_resource(ProfileResource, '/profile')
+api.add_resource(UserPostsResource, '/user/posts')
 api.add_resource(BlogPostResource, '/posts', '/posts/<int:post_id>')
 api.add_resource(CommentResource, '/posts/<int:post_id>/comments', '/comments/<int:comment_id>')
 api.add_resource(CategoryResource, '/categories')

@@ -1,9 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+  const [username, setUsername] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    fetch('/profile', {
+      method: 'GET',
+      credentials: 'include', 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.username) {
+          setUsername(data.username);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching user profile:', error);
+      });
+  }, []);
+
+  // Handle user logout
   const handleLogout = () => {
     fetch('/logout', {
       method: 'DELETE',
@@ -22,9 +43,19 @@ const Navbar = () => {
   return (
     <header className="bg-white shadow w-full fixed top-0 left-0 z-10">
       <div className="flex justify-between items-center p-4">
-        <h1 className="text-2xl font-bold text-blue-600 cursor-pointer">InkSpace</h1>
+        <h1
+          onClick={() => navigate('/posts')}
+          className="text-2xl font-bold text-blue-600 cursor-pointer"
+        >
+          InkSpace
+        </h1>
         <nav className="flex items-center">
-        <button 
+          {username && (
+            <span className="text-gray-700 mr-4">
+              Hello, <strong>{username}</strong>
+            </span>
+          )}
+          <button 
             onClick={() => navigate('/create')} 
             className="text-blue-600 mx-4 hover:text-blue-800 transition duration-200"
           >
@@ -34,7 +65,7 @@ const Navbar = () => {
             onClick={() => navigate('/profile')} 
             className="text-blue-600 mx-4 hover:text-blue-800 transition duration-200"
           >
-            Profile
+            Your profile
           </button>
           <button 
             onClick={handleLogout} 

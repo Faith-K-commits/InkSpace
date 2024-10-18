@@ -20,8 +20,7 @@ post_category = db.Table(
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
 
-    serialize_only = ('id', 'username', 'email')
-    serialize_rules = ('-password',)
+    serialize_rules = ('-_password_hash',)
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
