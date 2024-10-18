@@ -12,7 +12,7 @@ const Login = () => {
       password: '',
     },
     onSubmit: values => {
-      fetch('/api/auth/login', {
+      fetch('/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,7 +22,7 @@ const Login = () => {
       })
         .then(response => {
           if (response.ok) {
-            navigate('/');
+            navigate('/posts');
           } else {
             setError('Invalid credentials');
           }

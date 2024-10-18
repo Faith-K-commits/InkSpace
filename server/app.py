@@ -39,13 +39,13 @@ class Register(Resource):
             username=username,
             email=email,
             )
-        user.password_hash = password
+        new_user.password_hash = password
 
         try:
-            db.session.add(user)
+            db.session.add(new_user)
             db.session.commit()
 
-            session['user_id'] = user.id
+            session['user_id'] = new_user.id
 
             return new_user.to_dict(), 201
         
@@ -97,44 +97,60 @@ class BlogPostResource(Resource):
     def get(self, post_id=None):
         if post_id:
             post = BlogPost.query.get_or_404(post_id)
-            return jsonify(post.to_dict(only=("id","content")))
+            return jsonify(post.to_dict())
         else:
             posts = BlogPost.query.all()
-            return jsonify([post.to_dict(only=("id","content")) for post in posts])
+            return jsonify([post.to_dict() for post in posts])
 
     @login_required
-    def post(self):    
+    def post(self):
         data = request.get_json()
         title = data.get('title')
         content = data.get('content')
-        category_ids = data.get('category_ids')
-    
+        category_names = data.get('categories', [])
+
         if not title or not content:
-            return  make_response(jsonify({'message': 'Missing title or content'}), 400)
+            return make_response(jsonify({'message': 'Missing title or content'}), 400)
 
         user_id = session['user_id']
         user = User.query.get_or_404(user_id)
 
         post = BlogPost(title=title, content=content, author=user)
 
-        if category_ids:
-            categories = Category.query.filter(Category.id.in_(category_ids)).all()
-            post.categories.extend(categories)
+        if category_names:
+            for name in category_names:
+                category = Category.query.filter_by(name=name).first()
+                if not category:
+                    category = Category(name=name)
+                    db.session.add(category)
+                post.categories.append(category)
 
         db.session.add(post)
         db.session.commit()
-        return jsonify(post.to_dict()), 201
 
-    @login_required
+        return make_response(jsonify(post.to_dict()), 201)
+
+
     def put(self, post_id):
         post = BlogPost.query.get_or_404(post_id)
         data = request.get_json()
 
+        # Update post title and content
         post.title = data.get('title', post.title)
         post.content = data.get('content', post.content)
 
-        if 'category_ids' in data:
-            post.categories = Category.query.filter(Category.id.in_(data['category_ids'])).all()
+        if 'categories' in data:
+            # Clear existing categories
+            post.categories.clear()  
+
+            # Add new categories by name
+            for category_name in data['categories']:
+                category = Category.query.filter_by(name=category_name).first()
+                if not category:
+                    # If category doesn't exist, create a new one
+                    category = Category(name=category_name)
+                    db.session.add(category)
+                post.categories.append(category)  # Add the category to the post
 
         db.session.commit()
         return jsonify(post.to_dict())
