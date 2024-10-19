@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
@@ -10,7 +10,6 @@ const PostDetail = () => {
     const [comments, setComments] = useState([]);
 
     useEffect(() => {
-        // Fetch the post
         fetch(`/posts/${id}`)
             .then(res => {
                 if (!res.ok) {
@@ -41,6 +40,7 @@ const PostDetail = () => {
         if (window.confirm('Are you sure you want to delete this post?')) {
             fetch(`/posts/${id}`, {
                 method: 'DELETE',
+                credentials: 'include',
             })
                 .then(res => {
                     if (res.ok) {
@@ -91,7 +91,7 @@ const PostDetail = () => {
         })
             .then(res => {
                 if (res.ok) {
-                    return res.json(); // Return the new comment data
+                    return res.json(); 
                 }
                 throw new Error('Failed to add comment');
             })
@@ -122,8 +122,6 @@ const PostDetail = () => {
                 <div className='mt-6 text-gray-800'>
                     {post.content}
                 </div>
-
-                {/* Categories Section */}
                 <div className='mt-6'>
                     <h3 className='text-lg font-semibold mb-2'>Categories:</h3>
                     <ul className='flex flex-wrap space-x-2'>
@@ -134,8 +132,6 @@ const PostDetail = () => {
                         ))}
                     </ul>
                 </div>
-
-                {/* Edit and Delete Buttons */}
                 <div className='mt-6 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4'>
                     <button 
                         onClick={handleEdit} 
@@ -160,22 +156,24 @@ const PostDetail = () => {
                         Next
                     </button>
                 </div>
-
-                {/* Comments Section */}
                 <div className='mt-8'>
-                    <h3 className='text-lg font-semibold mb-2'>Comments:</h3>
-                    {comments.length > 0 ? (
-                        comments.map(comment => (
-                            <div key={comment.id} className='bg-gray-100 p-4 mb-4 rounded-lg'>
-                                <p className='text-gray-800 mb-1'>{comment.content}</p>
-                                <p className='text-sm text-gray-600'>by {comment.author.username} - {formattedDate}</p>
-                            </div>
-                        ))
-                    ) : (
-                        <p className='text-gray-500'>No comments yet.</p>
+                <h3 className='text-lg font-semibold mb-2'>Comments:</h3>
+    {comments.length > 0 ? (
+        comments.map(comment => (
+            <div key={comment.id} className='bg-gray-100 p-4 mb-4 rounded-lg'>
+                <p className='text-gray-800 mb-1'>{comment.content}</p>
+                <p className='text-sm text-gray-600'>
+                    by {comment.author.username} - {comment.created_at ? new Date(comment.created_at.split(' ')[0]).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                    }) : 'Unknown date'}
+                </p>
+            </div>
+        ))
+    ) : (
+                        <p className='text-gray-500'>No comments yet. Be the first to comment!</p>
                     )}
-
-                    {/* Comment Form using Formik */}
                     <Formik
                         initialValues={initialValues}
                         validationSchema={validationSchema}

@@ -46,7 +46,7 @@ const EditPost = () => {
             body: JSON.stringify({
                 title: values.title,
                 content: values.content,
-                categories: values.categories.split(',').map(cat => cat.trim()), // Convert string to array
+                categories: values.categories.split(',').map(cat => cat.trim()), 
             }),
         })
             .then(res => {
@@ -57,7 +57,7 @@ const EditPost = () => {
             })
             .then(data => {
                 alert('Post updated successfully!');
-                navigate(`/posts/${data.id}`); // Navigate back to the updated post
+                navigate(`/posts/${data.id}`); 
             })
             .catch(error => {
                 console.error('Error updating post:', error);
@@ -66,7 +66,7 @@ const EditPost = () => {
     };
 
     const handleCancel = () => {
-        navigate(`/posts/${id}`); // Navigate back to the post detail page
+        navigate(`/posts/${id}`); 
     };
 
     return (
@@ -76,7 +76,7 @@ const EditPost = () => {
                 initialValues={{
                     title: post.title,
                     content: post.content,
-                    categories: post.categories.map(category => category.name).join(', '), // Assuming categories is an array of objects
+                    categories: post.categories.map(category => category.name).join(', '), 
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}

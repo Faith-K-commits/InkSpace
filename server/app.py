@@ -83,6 +83,7 @@ class Login(Resource):
         return make_response(jsonify({"message": "Invalid email or password"}), 401)
 
 class ProfileResource(Resource):
+    @login_required
     def get(self):
         user_id = session.get('user_id')
         if not user_id:
@@ -93,22 +94,6 @@ class ProfileResource(Resource):
             return {'error': 'User not found'}, 404
         
         return make_response(jsonify(user.to_dict()), 200)
-
-class UserPostsResource(Resource):
-    def get(self):
-        user_id = session.get('user_id')
-        if not user_id:
-            return {'error': 'User not logged in'}, 401
-        
-        user = User.query.get(user_id)
-        if not user:
-            return {'error': 'User not found'}, 404
-
-        posts = BlogPost.query.filter_by(user_id=user_id).all()
-        posts_data = [post.to_dict() for post in posts]
-
-        return make_response(jsonify(posts_data, 200 ))
-
 class Logout(Resource):
     @login_required
     def delete(self):
@@ -157,27 +142,22 @@ class BlogPostResource(Resource):
 
         return make_response(jsonify(post.to_dict()), 201)
 
-
+    @login_required
     def put(self, post_id):
         post = BlogPost.query.get_or_404(post_id)
+        
         data = request.get_json()
-
-        # Update post title and content
         post.title = data.get('title', post.title)
         post.content = data.get('content', post.content)
 
         if 'categories' in data:
-            # Clear existing categories
             post.categories.clear()  
-
-            # Add new categories by name
             for category_name in data['categories']:
                 category = Category.query.filter_by(name=category_name).first()
                 if not category:
-                    # If category doesn't exist, create a new one
                     category = Category(name=category_name)
                     db.session.add(category)
-                post.categories.append(category)  # Add the category to the post
+                post.categories.append(category) 
 
         db.session.commit()
         return jsonify(post.to_dict())
@@ -185,9 +165,10 @@ class BlogPostResource(Resource):
     @login_required
     def delete(self, post_id):
         post = BlogPost.query.get_or_404(post_id)
+        
         db.session.delete(post)
         db.session.commit()
-        return  make_response(jsonify({'message': 'Blog post deleted'}),204)
+        return  make_response(jsonify({'message': 'Blog post deleted successfully'}),204)
 
 
 # Comment Resource
@@ -196,10 +177,10 @@ class CommentResource(Resource):
     def get (self, post_id):
         if post_id:
             comments = Comment.query.filter_by(post_id=post_id)
-            return jsonify([comment.to_dict(only=("id","content"))for comment in comments])
+            return jsonify([comment.to_dict()for comment in comments])
         else:
             comments = Comment.query.all()
-            return jsonify([comment.to_dict(only=("id","content")) for comment in comments])
+            return jsonify([comment.to_dict() for comment in comments])
 
     @login_required
     def post(self, post_id):
@@ -253,7 +234,6 @@ api.add_resource(Register, '/register')
 api.add_resource(Login, '/login')
 api.add_resource(Logout, '/logout')
 api.add_resource(ProfileResource, '/profile')
-api.add_resource(UserPostsResource, '/user/posts')
 api.add_resource(BlogPostResource, '/posts', '/posts/<int:post_id>')
 api.add_resource(CommentResource, '/posts/<int:post_id>/comments', '/comments/<int:comment_id>')
 api.add_resource(CategoryResource, '/categories')
