@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { toast, ToastContainer } from 'react-toastify';
 import * as Yup from 'yup';
+import 'react-toastify/dist/ReactToastify.css';
+import { handleDelete } from './HandleDelete'; 
 
 const PostDetail = () => {
     const { id } = useParams();
@@ -31,25 +34,28 @@ const PostDetail = () => {
             });
     }, [id]);
 
-    const handleDelete = () => {
-        if (window.confirm('Are you sure you want to delete this post?')) {
-            fetch(`/posts/${id}`, {
-                method: 'DELETE',
-                credentials: 'include',
-            })
-                .then(res => {
-                    if (res.ok) {
-                        alert('Post deleted successfully');
-                        navigate('/posts');
-                    } else {
-                        alert('Failed to delete the post');
-                    }
-                })
-                .catch(error => {
-                    console.error('Delete error:', error);
-                });
-        }
-    };
+    // const handleDelete = () => {
+    //     if (window.confirm('Are you sure you want to delete this post?')) {
+    //         fetch(`/posts/${id}`, {
+    //             method: 'DELETE',
+    //             credentials: 'include',
+    //         })
+    //             .then(res => {
+    //                 if (res.ok) {
+    //                     //alert('Post deleted successfully');
+    //                     toast.success('Post deleted successfully!');
+    //                     navigate('/posts');
+    //                 } else {
+    //                     //alert('Failed to delete the post');
+    //                     toast.success('Failed to delete the post');
+    //                 }
+    //             })
+    //             .catch(error => {
+    //                 console.error('Delete error:', error);
+    //             });
+    //     }
+    // };
+  
 
     const handleEdit = () => {
         navigate(`/posts/edit/${id}`);
@@ -111,6 +117,7 @@ const PostDetail = () => {
 
     return (
         <div className='bg-gray-50 min-h-screen p-6'>
+            <ToastContainer />
             <div className='container mx-auto bg-white p-8 rounded-lg shadow-lg'>
                 <h1 className='text-4xl font-bold mb-4'>{post.title}</h1>
                 <p className='text-gray-600 mb-4'>by {post.author.username} - {formattedDate}</p>
@@ -135,7 +142,8 @@ const PostDetail = () => {
                             Edit
                         </button>
                         <button 
-                            onClick={handleDelete} 
+                            //onClick={handleDelete} 
+                            onClick={() => handleDelete(id, navigate)} 
                             className='bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600'>
                             Delete
                         </button>

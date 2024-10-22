@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { toast, ToastContainer } from 'react-toastify';
 import * as Yup from 'yup';
+import 'react-toastify/dist/ReactToastify.css';
 
 const EditPost = () => {
     const { id } = useParams();
@@ -23,6 +25,7 @@ const EditPost = () => {
             })
             .catch(error => {
                 console.error('Fetch error:', error);
+                toast.error('Failed to fetch post.');
                 setLoading(false);
             });
     }, [id]);
@@ -55,13 +58,18 @@ const EditPost = () => {
                 }
                 return res.json();
             })
-            .then(data => {
-                alert('Post updated successfully!');
-                navigate(`/posts/${data.id}`); 
-            })
+            //.then(data => {
+            //    alert('Post updated successfully!');
+            //    navigate(`/posts/${data.id}`); 
+            //})
+            .then(() => {
+                toast.success('Post updated successfully!');
+                setTimeout(() => navigate(`/posts/${id}`), 1000);
+              })
             .catch(error => {
                 console.error('Error updating post:', error);
-                alert('Failed to update the post');
+                //alert('Failed to update the post');
+                toast.error('Failed to update post.');
             });
     };
 
@@ -71,6 +79,14 @@ const EditPost = () => {
 
     return (
         <div className='container mx-auto p-6'>
+            <ToastContainer
+                position="top-center"
+                autoClose={3000}  // 3 seconds
+                hideProgressBar={false}
+                closeOnClick
+                pauseOnHover
+                draggable
+            />
             <h1 className='text-3xl mb-4'>Edit Post</h1>
             <Formik
                 initialValues={{

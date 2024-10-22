@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const validate = values => {
   const errors = {};
@@ -40,8 +42,10 @@ const CreatePost = () => {
       .then(response => response.json())
       .then(data => {
         console.log('Post created:', data);
-        navigate('/posts')
-      });
+        toast.success('Post created successfully!');
+        navigate('/posts');
+      })
+      .catch(error => toast.error('Failed to create post.'));
     },
   });
 
@@ -65,6 +69,7 @@ const CreatePost = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+      <ToastContainer />
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full">
         <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Create New Post</h1>
         <form onSubmit={formik.handleSubmit}>
