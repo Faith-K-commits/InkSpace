@@ -6,7 +6,6 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
 from config import db, metadata, bcrypt
 
-# Models go here!
 #Association Table for Many to many Relationship between BlogPost and Category
 post_category = db.Table(
     'post_category',
@@ -98,8 +97,18 @@ class BlogPost(db.Model, SerializerMixin):
     category_names = association_proxy('categories', 'name',
                                        creator=lambda category_obj: Category(name=category_obj))
 
-    def __repr__(self):
-        return f'<BlogPost {self.title}, {self.content}>'
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'content': self.content,
+            'created_at': self.created_at,
+            'author': {
+                'id': self.user_id,
+                'username': self.author.username
+            },
+            'categories': [{'name': category.name} for category in self.categories]
+        }
     
 class Comment(db.Model, SerializerMixin):
     __tablename__ = 'comments'

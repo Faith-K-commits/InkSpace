@@ -8,31 +8,26 @@ const PostDetail = () => {
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
     const [comments, setComments] = useState([]);
+    const [userId, setUserId] = useState(null);
 
     useEffect(() => {
         fetch(`/posts/${id}`)
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
                 setPost(data);
-                return fetch(`/posts/${id}/comments`);
+                return fetch('/profile', {
+                    method: 'GET',
+                    credentials: 'include',
+                });
             })
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error('Failed to fetch comments');
-                }
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
-                setComments(data)
+                if (data.id) {
+                    setUserId(data.id);
+                }
             })
             .catch(error => {
-                console.error('Fetch error:', error);
-                setPost(null);
+                console.error('Error fetching data:', error);
             });
     }, [id]);
 
@@ -132,18 +127,20 @@ const PostDetail = () => {
                         ))}
                     </ul>
                 </div>
-                <div className='mt-6 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4'>
-                    <button 
-                        onClick={handleEdit} 
-                        className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'>
-                        Edit
-                    </button>
-                    <button 
-                        onClick={handleDelete} 
-                        className='bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600'>
-                        Delete
-                    </button>
-                </div>
+                {userId === post.author.id && (
+                    <div className='mt-6 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4'>
+                        <button 
+                            onClick={handleEdit} 
+                            className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'>
+                            Edit
+                        </button>
+                        <button 
+                            onClick={handleDelete} 
+                            className='bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600'>
+                            Delete
+                        </button>
+                    </div>
+                )}
                 <div className='mt-6 flex justify-between'>
                     <button 
                         onClick={handleBack} 
@@ -157,21 +154,21 @@ const PostDetail = () => {
                     </button>
                 </div>
                 <div className='mt-8'>
-                <h3 className='text-lg font-semibold mb-2'>Comments:</h3>
-    {comments.length > 0 ? (
-        comments.map(comment => (
-            <div key={comment.id} className='bg-gray-100 p-4 mb-4 rounded-lg'>
-                <p className='text-gray-800 mb-1'>{comment.content}</p>
-                <p className='text-sm text-gray-600'>
-                    by {comment.author.username} - {comment.created_at ? new Date(comment.created_at.split(' ')[0]).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                    }) : 'Unknown date'}
-                </p>
-            </div>
-        ))
-    ) : (
+                    <h3 className='text-lg font-semibold mb-2'>Comments:</h3>
+                    {comments.length > 0 ? (
+                        comments.map(comment => (
+                            <div key={comment.id} className='bg-gray-100 p-4 mb-4 rounded-lg'>
+                                <p className='text-gray-800 mb-1'>{comment.content}</p>
+                                <p className='text-sm text-gray-600'>
+                                    by {comment.author.username} - {comment.created_at ? new Date(comment.created_at.split(' ')[0]).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                    }) : 'Unknown date'}
+                                </p>
+                            </div>
+                        ))
+                    ) : (
                         <p className='text-gray-500'>No comments yet. Be the first to comment!</p>
                     )}
                     <Formik

@@ -15,7 +15,7 @@ const validate = values => {
 
 const CreatePost = () => {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState(['']); // State to manage category inputs
+  const [categories, setCategories] = useState(['']); 
 
   const formik = useFormik({
     initialValues: {

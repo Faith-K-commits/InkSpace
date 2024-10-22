@@ -146,6 +146,10 @@ class BlogPostResource(Resource):
     def put(self, post_id):
         post = BlogPost.query.get_or_404(post_id)
         
+        user_id = session['user_id']
+        if post.user_id != user_id:
+            return make_response(jsonify({'message': 'Forbidden: You are not the author of this post'}), 403)
+        
         data = request.get_json()
         post.title = data.get('title', post.title)
         post.content = data.get('content', post.content)
@@ -165,6 +169,10 @@ class BlogPostResource(Resource):
     @login_required
     def delete(self, post_id):
         post = BlogPost.query.get_or_404(post_id)
+        
+        user_id = session['user_id']
+        if post.user_id != user_id:
+            return make_response(jsonify({'message': 'Forbidden: You are not the author of this post'}), 403)
         
         db.session.delete(post)
         db.session.commit()
