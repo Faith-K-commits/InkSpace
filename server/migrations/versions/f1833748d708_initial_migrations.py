@@ -1,8 +1,8 @@
-"""replace password with _password_hash
+"""Initial migrations.
 
-Revision ID: f7c1387b2209
+Revision ID: f1833748d708
 Revises: 
-Create Date: 2024-10-18 08:01:05.896044
+Create Date: 2024-10-23 16:31:56.046624
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f7c1387b2209'
+revision = 'f1833748d708'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,17 +21,17 @@ def upgrade():
     op.create_table('categories',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_categories')),
+    sa.UniqueConstraint('name', name=op.f('uq_categories_name'))
     )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('_password_hash', sa.String(), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email'),
-    sa.UniqueConstraint('username')
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_users')),
+    sa.UniqueConstraint('email', name=op.f('uq_users_email')),
+    sa.UniqueConstraint('username', name=op.f('uq_users_username'))
     )
     op.create_table('blog_posts',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -40,7 +40,7 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_blog_posts_user_id_users')),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_blog_posts'))
     )
     op.create_table('comments',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -50,14 +50,14 @@ def upgrade():
     sa.Column('post_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['post_id'], ['blog_posts.id'], name=op.f('fk_comments_post_id_blog_posts')),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_comments_user_id_users')),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_comments'))
     )
     op.create_table('post_category',
     sa.Column('post_id', sa.Integer(), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], name=op.f('fk_post_category_category_id_categories')),
     sa.ForeignKeyConstraint(['post_id'], ['blog_posts.id'], name=op.f('fk_post_category_post_id_blog_posts')),
-    sa.PrimaryKeyConstraint('post_id', 'category_id')
+    sa.PrimaryKeyConstraint('post_id', 'category_id', name=op.f('pk_post_category'))
     )
     # ### end Alembic commands ###
 
