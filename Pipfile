@@ -19,6 +19,6 @@ gunicorn = "*"
 python-dotenv = "*"
 
 [requires]
-python_full_version = "3.10.3"
+python_full_version = "3.10.12"
 
 [dev-packages]
