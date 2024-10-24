@@ -37,7 +37,7 @@ const AuthPage = () => {
 
   const signupFormik = useFormik({
     initialValues: {
-      name: '',
+      username: '',
       email: '',
       password: '',
     },
