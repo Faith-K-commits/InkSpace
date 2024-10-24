@@ -39,7 +39,7 @@ metadata = MetaData(naming_convention={
 db = SQLAlchemy(metadata=metadata)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
-CORS(app, resources={r"/*": {"origins": "https://inkspacefrontend.onrender.com"}})
+CORS(app)
 api = Api(app)
 
 # Initialize SQLAlchemy with the app
