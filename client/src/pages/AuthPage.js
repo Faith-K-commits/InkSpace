@@ -26,7 +26,7 @@ const AuthPage = () => {
       })
         .then((response) => {
           if (response.ok) {
-            navigate('/');
+            navigate('/posts');
           } else {
             handleError('Invalid credentials');
           }
@@ -53,7 +53,7 @@ const AuthPage = () => {
         .then((data) => {
           if (data.token) {
             Cookies.set('token', data.token, { expires: 7 });
-            navigate('/');
+            navigate('/posts');
           } else {
             handleError('Sign-up failed');
           }
