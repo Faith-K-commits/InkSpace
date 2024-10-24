@@ -19,7 +19,7 @@ app = Flask(
     static_folder=client_build_path,
     template_folder=client_build_path
 )
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://inkspace_user:VQtOIIiSJvZTBmyyjrf9kYJynK1EIi6T@dpg-csd8m256l47c739h6en0-a.oregon-postgres.render.com/inkspace?sslmode=require')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://inkspacedb_user:NgZDXipVoE960b6UGIlbyndN7BkY1p1C@dpg-csdb17g8fa8c738vtjt0-a.oregon-postgres.render.com/inkspacedb')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 
