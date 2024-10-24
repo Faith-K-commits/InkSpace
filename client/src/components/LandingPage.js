@@ -9,7 +9,7 @@ const LandingPage = () => {
   };
 
   const handleSignup = () => {
-    navigate('/signup');
+    navigate('/login');
   };
 
   return (
