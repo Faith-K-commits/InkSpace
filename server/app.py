@@ -39,8 +39,7 @@ class Register(Resource):
             username=username,
             email=email,
             )
-        new_user.password_hash = password
-
+        new_user.password_hash =  generate_password_hash(password)
         try:
             db.session.add(new_user)
             db.session.commit()
@@ -49,8 +48,9 @@ class Register(Resource):
 
             return make_response(jsonify({"message": "User created successfully", "token": "your_token_here"}), 201)        
         
-        except IntegrityError:
+        except IntegrityError as e:
             db.session.rollback()
+            print(f"IntegrityError: {e}")  
             return make_response(jsonify({'error': '422 Unprocessable Entity'}), 422)
         
 
@@ -245,6 +245,8 @@ api.add_resource(ProfileResource, '/profile')
 api.add_resource(BlogPostResource, '/posts', '/posts/<int:post_id>')
 api.add_resource(CommentResource, '/posts/<int:post_id>/comments', '/comments/<int:comment_id>')
 api.add_resource(CategoryResource, '/categories')
+
+
 
 
 if __name__ == '__main__':
