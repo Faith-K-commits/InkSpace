@@ -17,7 +17,7 @@ const AuthPage = () => {
       password: '',
     },
     onSubmit: (values) => {
-      fetch('/login', {
+      fetch('https://inkspace-od83.onrender.com/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,7 +42,7 @@ const AuthPage = () => {
       password: '',
     },
     onSubmit: (values) => {
-      fetch('/register', {
+      fetch('https://inkspace-od83.onrender.com/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
