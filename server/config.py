@@ -54,3 +54,12 @@ def serve_index():
 @app.route('/<path:path>')
 def serve_static_files(path):
     return send_from_directory(client_build_path, path)
+
+@app.route('/routes', methods=['GET'])
+def list_routes():
+    output = []
+    for rule in app.url_map.iter_rules():
+        methods = ','.join(rule.methods)
+        route_info = f"{rule.endpoint}: {rule.rule} (Methods: {methods})"
+        output.append(route_info)
+    return '<br>'.join(output)
