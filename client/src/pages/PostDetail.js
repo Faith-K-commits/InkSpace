@@ -5,7 +5,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import * as Yup from 'yup';
 import Cookies from 'js-cookie';
 import 'react-toastify/dist/ReactToastify.css';
-import { handleDelete } from './HandleDelete'; 
+import { handleDelete } from './HandleDelete';
 
 const PostDetail = () => {
     const { id } = useParams();
@@ -13,7 +13,6 @@ const PostDetail = () => {
     const [post, setPost] = useState(null);
     const [comments, setComments] = useState([]);
     const [userId, setUserId] = useState(null);
-   
 
     useEffect(() => {
         const token = Cookies.get('token');
@@ -26,8 +25,8 @@ const PostDetail = () => {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`, 
-                      },
+                        'Authorization': `Bearer ${token}`,
+                    },
                 });
             })
             .then(res => res.json())
@@ -39,30 +38,12 @@ const PostDetail = () => {
             .catch(error => {
                 console.error('Error fetching data:', error);
             });
-    }, [id]);
 
-    // const handleDelete = () => {
-    //     if (window.confirm('Are you sure you want to delete this post?')) {
-    //         fetch(/posts/${id}, {
-    //             method: 'DELETE',
-    //             credentials: 'include',
-    //         })
-    //             .then(res => {
-    //                 if (res.ok) {
-    //                     //alert('Post deleted successfully');
-    //                     toast.success('Post deleted successfully!');
-    //                     navigate('/posts');
-    //                 } else {
-    //                     //alert('Failed to delete the post');
-    //                     toast.success('Failed to delete the post');
-    //                 }
-    //             })
-    //             .catch(error => {
-    //                 console.error('Delete error:', error);
-    //             });
-    //     }
-    // };
-  
+        fetch(`https://inkspacebackend-8xbi.onrender.com/comments/posts/${id}/comments`)
+            .then(res => res.json())
+            .then(data => setComments(data))
+            .catch(error => console.error('Error fetching comments:', error));
+    }, [id]);
 
     const handleEdit = () => {
         navigate(`/posts/edit/${id}`);
@@ -80,7 +61,7 @@ const PostDetail = () => {
         }
     };
 
-    const initialValues = { content: '' }; 
+    const initialValues = { content: '' };
 
     const validationSchema = Yup.object({
         content: Yup.string()
@@ -97,17 +78,17 @@ const PostDetail = () => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ content: values.content, author_id: userId }), 
+            body: JSON.stringify({ content: values.content, author_id: userId }),
         })
             .then(res => {
                 if (res.ok) {
-                    return res.json(); 
+                    return res.json();
                 }
                 throw new Error('Failed to add comment');
             })
             .then(data => {
-                setComments([...comments, data]); 
-                resetForm(); 
+                setComments([...comments, data]);
+                resetForm();
             })
             .catch(error => {
                 console.error('Error adding comment:', error);
@@ -177,7 +158,7 @@ const PostDetail = () => {
                             <div key={comment.id} className='bg-gray-100 p-4 mb-4 rounded-lg'>
                                 <p className='text-gray-800 mb-1'>{comment.content}</p>
                                 <p className='text-sm text-gray-600'>
-                                    by {comment.author?.username || 'Unknown'} - {comment.created_at ? new Date(comment.created_at.split(' ')[0]).toLocaleDateString('en-US', {
+                                    by {comment.author?.username || 'Unknown'} - {comment.created_at ? new Date(comment.created_at).toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'long',
                                         day: 'numeric',
@@ -188,32 +169,21 @@ const PostDetail = () => {
                     ) : (
                         <p className='text-gray-500'>No comments yet. Be the first to comment!</p>
                     )}
-                    <Formik
-                        initialValues={initialValues}
-                        validationSchema={validationSchema}
-                        onSubmit={handleCommentSubmit}
-                    >
-                        {({ isSubmitting }) => (
-                            <Form className='mt-4'>
-                                <Field 
-                                    as='textarea'
-                                    name='content' 
-                                    placeholder='Add a comment...' 
-                                    rows='3' 
-                                    className='w-full p-2 border border-gray-300 rounded mb-2'
-                                />
-                                <ErrorMessage name='content' component='div' className='text-red-500 text-sm mb-2' />
-                                <button 
-                                    type='submit' 
-                                    disabled={isSubmitting}
-                                    className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'
-                                >
-                                    Comment
-                                </button>
-                            </Form>
-                        )}
-                    </Formik>
                 </div>
+                <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleCommentSubmit}>
+                    <Form className='mt-4'>
+                        <Field
+                            name='content'
+                            as='textarea'
+                            placeholder='Write your comment...'
+                            className='w-full p-2 border rounded resize-none'
+                        />
+                        <ErrorMessage name='content' component='div' className='text-red-500 text-sm' />
+                        <button type='submit' className='bg-blue-500 text-white px-4 py-2 rounded mt-2 hover:bg-blue-600'>
+                            Submit Comment
+                        </button>
+                    </Form>
+                </Formik>
             </div>
         </div>
     );
