@@ -20,21 +20,24 @@ const AuthPage = () => {
       fetch('https://inkspacebackend-8xbi.onrender.com/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Cookies.get('token')}`,
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify(values),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.token) {
-            Cookies.set('token', data.token, { expires: 7 }); 
+    })
+    .then(response => {
+        console.log("Response Status:", response.status);  // Check status code
+        return response.json();
+    })
+    .then(data => {
+        console.log("Response Data:", data);  // Log full response data
+        if (data.token) {
+            Cookies.set('token', data.token, { expires: 7 });
             navigate('/posts');
-          } else {
-            handleError('invalid credentials');
-          }
-        })
-        .catch(() => handleError('Login error'));
+        } else {
+            handleError('Invalid Credentials');
+        }
+    })
+    .catch(error => console.error("Login error:", error));
     },
   });
 
@@ -81,7 +84,7 @@ const AuthPage = () => {
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     }}
-      >
+  >
       <div className="bg-gray-900 p-10 max-w-md w-full rounded-lg shadow-lg">
         <ul className="flex justify-around mb-10">
           <li

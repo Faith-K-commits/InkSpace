@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { toast, ToastContainer } from 'react-toastify';
 import * as Yup from 'yup';
+import Cookies from 'js-cookie';
 import 'react-toastify/dist/ReactToastify.css';
 import { handleDelete } from './HandleDelete'; 
 
@@ -12,15 +13,21 @@ const PostDetail = () => {
     const [post, setPost] = useState(null);
     const [comments, setComments] = useState([]);
     const [userId, setUserId] = useState(null);
+   
 
     useEffect(() => {
+        const token = Cookies.get('token');
+
         fetch(`https://inkspacebackend-8xbi.onrender.com/posts/${id}`)
             .then(res => res.json())
             .then(data => {
                 setPost(data);
-                return fetch('/profile', {
+                return fetch('https://inkspacebackend-8xbi.onrender.com/profile', {
                     method: 'GET',
-                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`, 
+                      },
                 });
             })
             .then(res => res.json())
@@ -36,7 +43,7 @@ const PostDetail = () => {
 
     // const handleDelete = () => {
     //     if (window.confirm('Are you sure you want to delete this post?')) {
-    //         fetch(`/posts/${id}`, {
+    //         fetch(/posts/${id}, {
     //             method: 'DELETE',
     //             credentials: 'include',
     //         })
@@ -58,7 +65,7 @@ const PostDetail = () => {
   
 
     const handleEdit = () => {
-        navigate(`/posts/edit/${id}`);
+        navigate(/posts/edit/`${id}`);
     };
 
     const handleNext = () => {
@@ -83,10 +90,12 @@ const PostDetail = () => {
     });
 
     const handleCommentSubmit = (values, { resetForm }) => {
-        fetch(`https://inkspacebackend-8xbi.onrender.com/posts/${id}/comments`, {
+        const token = Cookies.get('token');
+        fetch(`https://inkspacebackend-8xbi.onrender.com/comments/posts/${id}/comments`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify({ content: values.content }),
         })
@@ -120,7 +129,7 @@ const PostDetail = () => {
             <ToastContainer />
             <div className='container mx-auto bg-white p-8 rounded-lg shadow-lg'>
                 <h1 className='text-4xl font-bold mb-4'>{post.title}</h1>
-                <p className='text-gray-600 mb-4'>by {post.author.username} - {formattedDate}</p>
+                <p className='text-gray-600 mb-4'>by {post.author?.username || 'Unknown'} - {formattedDate}</p>
                 <div className='mt-6 text-gray-800'>
                     {post.content}
                 </div>
@@ -134,7 +143,7 @@ const PostDetail = () => {
                         ))}
                     </ul>
                 </div>
-                {userId === post.author.id && (
+                {userId === post?.author?.id && (
                     <div className='mt-6 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4'>
                         <button 
                             onClick={handleEdit} 
@@ -142,13 +151,13 @@ const PostDetail = () => {
                             Edit
                         </button>
                         <button 
-                            //onClick={handleDelete} 
                             onClick={() => handleDelete(id, navigate)} 
                             className='bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600'>
                             Delete
                         </button>
                     </div>
                 )}
+
                 <div className='mt-6 flex justify-between'>
                     <button 
                         onClick={handleBack} 
@@ -168,7 +177,7 @@ const PostDetail = () => {
                             <div key={comment.id} className='bg-gray-100 p-4 mb-4 rounded-lg'>
                                 <p className='text-gray-800 mb-1'>{comment.content}</p>
                                 <p className='text-sm text-gray-600'>
-                                    by {comment.author.username} - {comment.created_at ? new Date(comment.created_at.split(' ')[0]).toLocaleDateString('en-US', {
+                                    by {comment.author?.username || 'Unknown'} - {comment.created_at ? new Date(comment.created_at.split(' ')[0]).toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'long',
                                         day: 'numeric',
