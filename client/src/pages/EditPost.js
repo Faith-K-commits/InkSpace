@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { toast, ToastContainer } from 'react-toastify';
+import Cookies from 'js-cookie';
 import * as Yup from 'yup';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -41,10 +42,13 @@ const EditPost = () => {
     }
 
     const handleSubmit = (values) => {
+        const token = Cookies.get('token');
+
         fetch(`https://inkspacebackend-8xbi.onrender.com/posts/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify({
                 title: values.title,
