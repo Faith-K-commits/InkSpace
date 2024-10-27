@@ -31,7 +31,7 @@ const AuthPage = () => {
             Cookies.set('token', data.token, { expires: 7 }); 
             navigate('/posts');
           } else {
-            handleError('Login failed');
+            handleError('invalid credentials');
           }
         })
         .catch(() => handleError('Login error'));
