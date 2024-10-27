@@ -17,18 +17,21 @@ const AuthPage = () => {
       password: '',
     },
     onSubmit: (values) => {
-      fetch('https://inkspace-m69o.onrender.com/login', {
+      fetch('https://inkspacebackend-8xbi.onrender.com/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('token')}`,
         },
         body: JSON.stringify(values),
       })
-        .then((response) => {
-          if (response.ok) {
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.token) {
+            Cookies.set('token', data.token, { expires: 7 }); 
             navigate('/posts');
           } else {
-            handleError('Invalid credentials');
+            handleError('invalid credentials');
           }
         })
         .catch(() => handleError('Login error'));
@@ -42,23 +45,31 @@ const AuthPage = () => {
       password: '',
     },
     onSubmit: (values) => {
-      fetch('https://inkspace-m69o.onrender.com/register', {
+      fetch('https://inkspacebackend-8xbi.onrender.com/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(values),
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (!response.ok) {
+            // Handle non-2xx responses
+            return response.json().then((errorData) => {
+              throw new Error(errorData.message || 'Sign-up failed');
+            });
+          }
+          return response.json();
+        })
         .then((data) => {
           if (data.token) {
             Cookies.set('token', data.token, { expires: 7 });
             navigate('/posts');
           } else {
-            handleError('Sign-up failed');
+            handleError('Sign-up failed: No token received');
           }
         })
-        .catch(() => handleError('Sign-up error'));
+        .catch((error) => handleError(error.message));
     },
   });
 
@@ -70,7 +81,7 @@ const AuthPage = () => {
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     }}
-  >
+      >
       <div className="bg-gray-900 p-10 max-w-md w-full rounded-lg shadow-lg">
         <ul className="flex justify-around mb-10">
           <li
@@ -147,7 +158,7 @@ const SignupForm = ({ formik, error }) => (
       <div className="mb-6">
         <input
           type="text"
-          name="name"
+          name="username"
           onChange={formik.handleChange}
           value={formik.values.name}
           placeholder="Name"
