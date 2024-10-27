@@ -20,7 +20,7 @@ const PostCard = ({ post }) => {
         <div className="bg-white shadow-lg rounded-lg overflow-hidden transition-transform transform hover:scale-105 max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
             <div className="p-6">
                 <h2 className="text-2xl font-semibold text-gray-800 mb-2">{post.title}</h2>
-                <p className="text-gray-600 text-sm mb-4">by {post.author.username} - {formattedDate}</p>
+                <p className="text-gray-600 text-sm mb-4">by {post.author?.username || 'Unknown Author'} - {formattedDate}</p>
                 <p className="text-gray-700">{excerpt}</p>
                 <button onClick={handleClickPost} className="mt-4 text-blue-500 hover:underline">Read More</button>
             </div>
