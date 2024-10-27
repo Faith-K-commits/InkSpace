@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 const Navbar = () => {
   const [username, setUsername] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
+    const token = Cookies.get('token'); // Get the token from cookies
+  
     fetch('https://inkspacebackend-8xbi.onrender.com/profile', {
-      method: 'GET',
-      credentials: 'include', 
+      method: 'GET', 
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, 
       },
     })
       .then(response => response.json())
@@ -23,21 +26,31 @@ const Navbar = () => {
         console.error('Error fetching user profile:', error);
       });
   }, []);
+  
 
   // Handle user logout
   const handleLogout = () => {
-    // fetch('https://inkspacebackend-8xbi.onrender.com/auth/logout', {
-    //   method: 'DELETE',
-    //   credentials: 'include',
-    // })
-    //   .then(response => {
-    //     if (response.ok) {
-          navigate('/');
-      //   }
-      // })
-      // .catch(() => {
-      //   console.error('Logout failed');
-      // });
+    const token = Cookies.get('token'); 
+  
+    fetch('https://inkspacebackend-8xbi.onrender.com/auth/logout', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, 
+      },
+      credentials: 'include', 
+    })
+      .then(response => {
+        if (response.ok) {
+          Cookies.remove('token');
+          navigate('/'); // Navigate to home page after logging out
+        } else {
+          console.error('Logout failed with status:', response.status);
+        }
+      })
+      .catch(error => {
+        console.error('Logout failed:', error);
+      });
   };
 
   return (

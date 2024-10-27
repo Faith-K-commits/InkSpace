@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
 import PostCard from '../components/PostCard';
 import Navbar from '../components/NavBar';
+
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('https://inkspacebackend-8xbi.onrender.com/profile/profile', {
+    const token = Cookies.get('token');
+
+    fetch('https://inkspacebackend-8xbi.onrender.com/profile', {
       method: 'GET',
-      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, 
+      },
     })
       .then(response => response.json())
       .then(data => {
@@ -45,13 +52,13 @@ const Profile = () => {
 
       <h3 className="text-xl font-bold mb-4">Your Posts</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {profile.posts.length > 0 ? (
-          profile.posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))
-        ) : (
-          <p className="text-gray-500">You have no posts yet.</p>
-        )}
+      {profile.posts && profile.posts.length > 0 ? (
+         profile.posts.map((post) => (
+        <PostCard key={post.id} post={post} />
+      ))
+    ) : (
+      <p className="text-gray-500">You have no posts yet.</p>
+    )}
       </div>
     </div>
     </div>

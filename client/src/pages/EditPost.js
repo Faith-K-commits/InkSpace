@@ -60,7 +60,7 @@ const EditPost = () => {
             })
             //.then(data => {
             //    alert('Post updated successfully!');
-            //    navigate(`/posts/${data.id}`); 
+            //    navigate(/posts/${data.id}); 
             //})
             .then(() => {
                 toast.success('Post updated successfully!');
@@ -74,7 +74,7 @@ const EditPost = () => {
     };
 
     const handleCancel = () => {
-        navigate(`https://inkspacebackend-8xbi.onrender.com/posts/${id}`); 
+        navigate(`/posts/${id}`); 
     };
 
     return (

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 import BackgroundImage from '../images/background.jpg';
 
 const validate = values => {
@@ -35,6 +36,7 @@ const CreatePost = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('token')}`,  // Adding token
         },
         body: JSON.stringify(postData),
       })
@@ -42,6 +44,9 @@ const CreatePost = () => {
         .then(data => {
           console.log('Post created:', data);
           navigate('/posts');
+        })
+        .catch(error => {
+          console.error('Error creating post:', error);
         });
     },
   });

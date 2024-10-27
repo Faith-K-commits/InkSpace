@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import PostCard from '../components/PostCard';
 import NavBar from '../components/NavBar';
+import Cookies from 'js-cookie';
 
 const Home = () => {
     const [posts, setPosts] = useState([]);
 
     useEffect(() => {
-        fetch('https://inkspacebackend-8xbi.onrender.com/posts')
+        const token = Cookies.get('token'); 
+        fetch('https://inkspacebackend-8xbi.onrender.com/posts', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`, 
+                'Content-Type': 'application/json',
+            },
+        })
             .then(res => {
                 if (!res.ok) {
                     throw new Error('Network response was not ok');
@@ -26,7 +34,7 @@ const Home = () => {
                 setPosts([]);
             });
     }, []);
-
+    
     return (
         <div className="bg-gray-50 min-h-screen p-4 sm:p-6">
             <NavBar />
