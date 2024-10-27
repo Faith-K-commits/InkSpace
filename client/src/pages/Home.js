@@ -23,6 +23,7 @@ const Home = () => {
             })
             .then(data => {
                 if (Array.isArray(data)) {
+                    console.log(data)
                     setPosts(data);
                 } else {
                     console.error('Expected an array but got:', data);

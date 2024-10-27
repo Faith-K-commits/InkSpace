@@ -97,7 +97,7 @@ const PostDetail = () => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ content: values.content }),
+            body: JSON.stringify({ content: values.content, author_id: userId }), 
         })
             .then(res => {
                 if (res.ok) {
