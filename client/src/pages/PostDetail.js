@@ -65,7 +65,7 @@ const PostDetail = () => {
   
 
     const handleEdit = () => {
-        navigate(/posts/edit/`${id}`);
+        navigate(`/posts/edit/${id}`);
     };
 
     const handleNext = () => {
