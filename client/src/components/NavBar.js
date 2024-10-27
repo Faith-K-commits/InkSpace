@@ -6,7 +6,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('/profile', {
+    fetch('https://inkspacebackend-8xbi.onrender.com/profile', {
       method: 'GET',
       credentials: 'include', 
       headers: {
@@ -26,18 +26,18 @@ const Navbar = () => {
 
   // Handle user logout
   const handleLogout = () => {
-    fetch('/logout', {
-      method: 'DELETE',
-      credentials: 'include',
-    })
-      .then(response => {
-        if (response.ok) {
+    // fetch('https://inkspacebackend-8xbi.onrender.com/auth/logout', {
+    //   method: 'DELETE',
+    //   credentials: 'include',
+    // })
+    //   .then(response => {
+    //     if (response.ok) {
           navigate('/');
-        }
-      })
-      .catch(() => {
-        console.error('Logout failed');
-      });
+      //   }
+      // })
+      // .catch(() => {
+      //   console.error('Logout failed');
+      // });
   };
 
   return (

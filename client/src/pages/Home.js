@@ -6,7 +6,7 @@ const Home = () => {
     const [posts, setPosts] = useState([]);
 
     useEffect(() => {
-        fetch('/posts')
+        fetch('https://inkspacebackend-8xbi.onrender.com/posts')
             .then(res => {
                 if (!res.ok) {
                     throw new Error('Network response was not ok');
