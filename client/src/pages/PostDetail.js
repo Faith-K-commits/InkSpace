@@ -61,6 +61,10 @@ const PostDetail = () => {
         }
     };
 
+    const handleClose = () => {
+        navigate('/posts');
+    };
+
     const initialValues = { content: '' };
 
     const validationSchema = Yup.object({
@@ -106,8 +110,16 @@ const PostDetail = () => {
     });
 
     return (
-        <div className='bg-gray-900 min-h-screen p-6 text-gray-300'>
+        <div className='bg-gray-900 min-h-screen p-6 text-gray-300 relative'>
             <ToastContainer />
+            {/* Close Button */}
+            <button 
+                onClick={handleClose} 
+                className='absolute top-6 right-6 text-gray-400 hover:text-gray-200 transition-colors duration-150 text-xl font-bold'
+                aria-label="Close"
+            >
+                &times;
+            </button>
             <div className='container mx-auto bg-gray-800 p-8 rounded-lg shadow-lg'>
                 <h1 className='text-4xl font-bold mb-4 text-gray-100'>{post.title}</h1>
                 <p className='text-gray-400 mb-4'>by {post.author?.username || 'Unknown'} - {formattedDate}</p>
