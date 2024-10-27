@@ -22,7 +22,7 @@ const PostDetail = () => {
             .then(res => res.json())
             .then(data => {
                 setPost(data);
-                return fetch('http://127.0.0.1:5000/profile', {
+                return fetch('https://inkspacebackend-8xbi.onrender.com/profile', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
