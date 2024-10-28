@@ -1,4 +1,5 @@
 import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
 
 export const handleDelete = (id, navigate) => {
   toast.warn(
@@ -48,9 +49,14 @@ export const handleDelete = (id, navigate) => {
 };
 
 const deletePost = (id, navigate) => {
+  const token = Cookies.get('token');
+  
   fetch(`https://inkspacebackend-8xbi.onrender.com/posts/${id}`, {
     method: 'DELETE',
-    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+  },
   })
     .then((res) => {
       if (res.ok) {
